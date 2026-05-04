@@ -1,0 +1,24 @@
+# DNSPod Token（格式：ID,Token）
+dnspod_token: "12345,abcdefghijklmnopqrstuvwxyz"
+
+# 域名配置
+domain: "example.com"
+ipv4_subdomain: "home"     # IPv4 A 记录（留空不更新）
+ipv6_subdomain: "home-v6"  # IPv6 AAAA 记录（留空不更新）
+lan_subdomain: "lan"       # 局域网 A 记录（留空不更新）
+
+# 自定义 IP 检测服务（留空使用公共默认服务）
+# 部署 ip-echo 服务后填入地址，如 http://your-vps:8080
+ipv4_url: ""
+ipv6_url: ""
+
+# 检测间隔（秒）
+interval: 600
+
+# Telegram 通知（可选）
+telegram:
+  bot_token: ""
+  chat_id: ""
+
+# 日志级别: debug, info, warn, error
+log_level: "info"
