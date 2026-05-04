@@ -10,3 +10,17 @@ services:
     environment:
       - TZ=Asia/Shanghai
     network_mode: host
+
+  # 自建 IP 检测服务（按需启用）
+  # ip-echo:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.ip-echo
+  #   container_name: ip-echo
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8080:8080"   # IPv4
+  #     - "8081:8081"   # IPv6
+  #   environment:
+  #     - IPV4_PORT=8080
+  #     - IPV6_PORT=8081

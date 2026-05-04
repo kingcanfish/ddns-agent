@@ -10,19 +10,37 @@ import (
 )
 
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
+	ipv4Port := os.Getenv("IPV4_PORT")
+	if ipv4Port == "" {
+		ipv4Port = "8080"
+	}
+	ipv6Port := os.Getenv("IPV6_PORT")
+	if ipv6Port == "" {
+		ipv6Port = "8081"
 	}
 
-	http.HandleFunc("/", handleIP)
-	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", handleIP)
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("ok"))
 	})
 
-	log.Printf("ip-echo listening on :%s", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	go func() {
+		ln, err := net.Listen("tcp4", ":"+ipv4Port)
+		if err != nil {
+			log.Fatalf("IPv4 listen failed: %v", err)
+		}
+		log.Printf("ip-echo IPv4 listening on :%s", ipv4Port)
+		log.Fatal(http.Serve(ln, mux))
+	}()
+
+	ln, err := net.Listen("tcp6", ":"+ipv6Port)
+	if err != nil {
+		log.Fatalf("IPv6 listen failed: %v", err)
+	}
+	log.Printf("ip-echo IPv6 listening on :%s", ipv6Port)
+	log.Fatal(http.Serve(ln, mux))
 }
 
 func handleIP(w http.ResponseWriter, r *http.Request) {

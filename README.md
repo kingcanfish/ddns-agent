@@ -98,23 +98,44 @@ go build -o ddns-agent ./cmd/ddns-agent
 
 默认使用公共检测服务（ip.sb、ipify.org 等），如果需要自建：
 
+ip-echo 监听两个端口：IPv4 端口只绑定 `tcp4`，IPv6 端口只绑定 `tcp6`。
+域名只添加 A 记录指向 IPv4 端口、只添加 AAAA 记录指向 IPv6 端口，即可区分。
+
 ### 部署 ip-echo
 
 ```bash
 # 直接运行
 go build -o ip-echo ./cmd/ip-echo
-PORT=8080 ./ip-echo
+IPV4_PORT=8080 IPV6_PORT=8081 ./ip-echo
 
-# Docker
+# Docker（同时暴露两个端口）
 docker build -f Dockerfile.ip-echo -t ip-echo .
-docker run -d -p 8080:8080 --restart=unless-stopped --name ip-echo ip-echo
+docker run -d -p 8080:8080 -p 8081:8081 --restart=unless-stopped --name ip-echo ip-echo
 ```
+
+### DNS 配置
+
+假设 VPS 的 IPv4 是 `1.2.3.4`，IPv6 是 `2001:db8::1`：
+
+| 记录类型 | 主机记录 | 值 | 端口 |
+|---------|---------|-----|------|
+| A | `ip` | `1.2.3.4` | 8080 |
+| AAAA | `ip6` | `2001:db8::1` | 8081 |
+
+> 或者用同一个主机记录 `ip`，但客户端访问时可能优先走 IPv6，所以建议分开。
 
 ### 验证
 
 ```bash
-curl http://your-vps:8080
-# 返回你的公网 IP
+curl http://ip.example.com:8080    # 返回 IPv4
+curl http://ip6.example.com:8081   # 返回 IPv6
+```
+
+### ddns-agent 配置
+
+```yaml
+ipv4_url: "http://ip.example.com:8080"
+ipv6_url: "http://ip6.example.com:8081"
 ```
 
 ### 配置
