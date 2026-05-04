@@ -103,14 +103,16 @@ ip-echo 监听两个端口：IPv4 端口只绑定 `tcp4`，IPv6 端口只绑定 
 
 ### 部署 ip-echo
 
+> 前提：VPS 需要有 IPv6 地址。验证：`curl -6 ip.sb`
+
 ```bash
 # 直接运行
 go build -o ip-echo ./cmd/ip-echo
 IPV4_PORT=8080 IPV6_PORT=8081 ./ip-echo
 
-# Docker（同时暴露两个端口）
+# Docker（必须用 host 网络，否则容器内没有 IPv6）
 docker build -f Dockerfile.ip-echo -t ip-echo .
-docker run -d -p 8080:8080 -p 8081:8081 --restart=unless-stopped --name ip-echo ip-echo
+docker run -d --network=host --restart=unless-stopped --name ip-echo ip-echo
 ```
 
 ### DNS 配置
